@@ -1,6 +1,6 @@
 # Projet Big Data Framework
 
-> Analyse du Marché Immobilier Français en 2025 
+> Analyse du Marché Immobilier Français en 2025 -
 > Auteurs : **Adam GHORIFA · Zain MEHR**
 
 ---
@@ -90,5 +90,25 @@ hdfs dfs -ls /raw/communes/
 ```bash
 docker cp feeder.py spark-master:feeder.py
 docker cp config/config.ini spark-master:config.ini
+```
+
+
+## Étape 5 — Exécuter le feeder depuis le container Spark
+
+```bash
+docker exec -it spark-master bash
+
+# On exécute la commande qui lance le feeder
+PYSPARK_PYTHON=python3 spark/bin/spark-submit   --master local[*]   --name feeder   feeder.py   --config config.ini
+
+# Exemple d'affiche en cas de succès de l'exécution
+[2026-05-18 10:04:55] [INFO] DVF ecrit avec succes en Parquet partitionne
+[2026-05-18 10:04:55] [INFO] DVF ingere : 3714829 lignes
+[2026-05-18 10:04:55] [INFO] Lecture du fichier communes : /communes_2025.csv
+[2026-05-18 10:04:56] [INFO] Communes brut charge - 34935 lignes, 47 colonnes
+[2026-05-18 10:04:57] [INFO] Ecriture Parquet communes vers : hdfs://namenode:9000/raw/communes
+[2026-05-18 10:04:59] [INFO] Communes ecrites avec succes en Parquet partitionne
+[2026-05-18 10:04:59] [INFO] Communes ingerees : 34935 lignes
+[2026-05-18 10:04:59] [INFO] === Feeder termine avec succes ===
 ```
 
