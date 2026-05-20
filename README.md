@@ -73,16 +73,11 @@ hdfs dfs -mkdir -p /silver
 hdfs dfs -ls /
 ```
 
-## Étape 3 — Copier les CSV dans HDFS
+## Étape 3 — Copier les fichiers sources dans le container Spark
 
 ```bash
-# Toujours depuis namenode
-hdfs dfs -put dvf_2025.txt /raw/dvf/
-hdfs dfs -put communes_2025.csv /raw/communes/
-
-# Vérifier
-hdfs dfs -ls /raw/dvf/
-hdfs dfs -ls /raw/communes/
+docker cp data/dvf_2025.txt spark-master:/dvf_2025.txt
+docker cp data/communes_2025.csv spark-master:/communes_2025.csv
 ```
 
 ## Étape 4 — Copier feeder.py dans le container Spark
@@ -112,3 +107,41 @@ PYSPARK_PYTHON=python3 spark/bin/spark-submit   --master local[*]   --name feede
 [2026-05-18 10:04:59] [INFO] === Feeder termine avec succes ===
 ```
 
+## Étape 6 — Copier processor.py dans le container Spark
+
+```bash
+docker cp processor.py spark-master:/processor.py
+```
+
+## Étape 7 — Exécuter le feeder depuis le container Spark
+
+```bash
+docker exec -it spark-master bash
+
+# On exécute la commande qui lance le feeder
+PYSPARK_PYTHON=python3 spark/bin/spark-submit \
+  --master local[*] \
+  --name processor \
+  processor.py \
+  --config config.ini
+
+# Exemple d'affiche en cas de succès de l'exécution
+"[2026-05-20 11:41:02] [INFO] Regle 2 (surface_reelle_bati > 0) - 1230819 lignes restantes
+[2026-05-20 11:41:03] [INFO] Regle 3 (type_local Maison/Appartement) - 1122389 lignes restantes
+[2026-05-20 11:41:04] [INFO] Regle 4 (code_insee 5 caracteres) - 1108781 lignes restantes
+[2026-05-20 11:41:05] [INFO] Regle 5 (date_mutation non nulle) - 1108781 lignes restantes
+[2026-05-20 11:41:06] [INFO] Validation terminee - 2606048 lignes supprimees sur 3714829
+[2026-05-20 11:41:06] [INFO] Debut des transformations
+[2026-05-20 11:41:06] [INFO] Transformations terminees - prix_m2 calcule
+[2026-05-20 11:41:06] [INFO] Jointure DVF x communes sur code_insee_reconstruit / code_insee
+[2026-05-20 11:41:10] [INFO] Jointure terminee - 1020868 lignes
+[2026-05-20 11:41:10] [INFO] Application du cache avant les window functions
+[2026-05-20 11:41:20] [INFO] Cache applique
+[2026-05-20 11:41:20] [INFO] Window 1 (prix median par commune) appliquee
+[2026-05-20 11:41:20] [INFO] Window 2 (rank par type local) appliquee
+[2026-05-20 11:41:20] [INFO] Window 3 (lag evolution temporelle) appliquee
+[2026-05-20 11:41:20] [INFO] Toutes les window functions appliquees
+[2026-05-20 11:41:20] [INFO] Creation de la base Hive si elle n'existe pas : silver
+[2026-05-20 11:42:18] [INFO] Table Hive silver.dvf_enrichi ecrite avec succes
+[2026-05-20 11:42:18] [INFO] === Processor termine avec succes ==="
+```
