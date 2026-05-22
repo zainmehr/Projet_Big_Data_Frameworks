@@ -24,9 +24,11 @@ Source DVF 2025 ──► feeder.py ──► /raw (HDFS, Parquet)
                                                       ▼
                                                  datamart.py ──► PostgreSQL (4 datamarts)
                                                                        │
-                                                          ┌────────────┴────────────┐
-                                                          ▼                         ▼
-                                                    API REST (FastAPI)        Dashboard (Streamlit)
+                                                                       ▼
+                                                               API REST (FastAPI)
+                                                                       │
+                                                                       ▼
+                                                               Dashboard (Streamlit)
 ```
 
 ---
