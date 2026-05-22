@@ -289,6 +289,8 @@ Depuis la **racine du projet** (important pour la résolution des imports) :
 python -m uvicorn api.app:app --reload
 ```
 
+Note : utiliser "python3" au lieu de "python" sur mac
+
 > Si la commande `uvicorn` seule renvoie « command not found » (PATH Windows), utiliser bien la forme `python -m uvicorn` ci-dessus.
 
 Logs en cas de succès :
